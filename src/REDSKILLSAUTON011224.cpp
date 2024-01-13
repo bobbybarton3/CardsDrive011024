@@ -50,7 +50,7 @@ rotation ATrack = rotation(PORT11, false);
 
 pot Rpot = pot(Brain.ThreeWirePort.A);
 
-limit LLimit = limit(Brain.ThreeWirePort.B);
+pot Lpot = pot(Brain.ThreeWirePort.H);
 
 distance Fvis = distance(PORT3);
 
@@ -120,7 +120,7 @@ int PrintTask(){
     // printf("RV1 %.2f", ReadVar1);
     // printf(" fvis %.2f", Fvis.objectDistance(inches));
     // printf(" bvis %.2f", Bvis.objectDistance(inches));
-    printf(" rpot %.2f", Rpot.angle(degrees));
+    printf(" lpot %.2f", Lpot.angle(degrees));
     printf("Gyro %.2f", Dir);
     // // printf(" xTrack %.2f", x);
     // // printf(" yTrack %.2f", y);
@@ -619,45 +619,32 @@ void CloseRWing(){
   RWing.stop(brake);
 }
 
-// void Smack(float pause = 0){
-//   //close
-//   printf("started");
-//   RWing.spin(forward, 12, volt);
-//   while(Rpot.angle(degrees) < 53){
-//     printf("spinning");
-//     wait(10, msec);
-//   }
-//   RWing.stop(brake);
-//   wait(pause, msec);
-//   printf("stopped");
+void OpenLWing(){
+  bool stopWings = false;
+  bool limitPressed = false;
+  LWing.spin(forward, 12, volt);
+  while(!stopWings){
+    float angel = Lpot.angle(degrees);
+    if(angel > 58){
+      limitPressed = true;
+    }
+    if(limitPressed && angel <= 50){
+      stopWings = true;
+    }
 
-//   //open
+    wait(10, msec);
+  }
+  LWing.stop(brake);
+}
 
-//   RWing.spin(forward, 12, volt);
-//   while(Rpot.angle(degrees) >= 50){
-//     wait(10, msec);
-//   }
-//   RWing.stop(brake);
-// }
+void CloseLWing(){
+  LWing.spin(forward, 12, volt);
+  while(Lpot.angle(degrees) < 55){
+    wait(10, msec);
+  }
+  LWing.stop(brake);
+}
 
-// void Smack(float pause = 0){
-//   bool stopWings = false;
-//   bool limitPressed = false;
-//   RWing.spin(forward, 12, volt);
-//   while(!stopWings){
-//     float angel = Rpot.angle(degrees);
-//     if(angel > 58){
-//       limitPressed = true;
-//     }
-//     if(limitPressed && angel <= 50){
-//       stopWings = true;
-//     }
-
-//     wait(10, msec);
-//   }
-//   RWing.stop(brake);
-//   wait(pause, msec);
-// }
 
 void Smack(float pause = 0){
   RWing.spin(forward, 12, volt);
@@ -751,6 +738,7 @@ void autonomous(void) {
   
   //Launching Triballs ~35 seconds
 
+  /*OpenLWing();*/
   Clench();
   for (int i = 0; i < 25; i++)
   {
@@ -760,13 +748,86 @@ void autonomous(void) {
 
   //Push triballs passed line
 
-  if(x < 25){
-    PTurn(30, 0);
-    PDrive(30, 0);
-  }
   CloseRWing();
 
-  // PDrive(0, 0);
+  PDrive(36, 8);
+  
+  while(x < 54){
+    PTurn(60, 8);
+    PDrive(60, 8);
+  }
+  
+  while(x > 36){
+    PTurn(36, 14, false);
+    PDrive(36, 14);
+  }
+
+  /*CloseLWing()*/
+
+  //Push balls over barrier and become wall
+
+  PTurn(36, 36);
+  PDrive(36, 36);
+  PTurn(66, 36);
+  PDrive(66, 36); 
+  PDrive(60, 36);
+  PTurn(48, 90);
+  OpenRWing();
+  /*OpenLWing()*/
+  PDrive(48, 90);
+  wait(2, seconds);
+
+  //return to alley and push balls down alley
+
+  CloseRWing();
+  /*CloseLWing()*/
+  PDrive(48, 72);
+  PTurn(36, 10);
+  PDrive(36, 10);
+
+  PTurn(84, 10); //possibly get rid of this turn and substitute for 0 turn and do wall check
+  PDrive(84, 10);
+  /*OpenLWing()*/
+  PTurn(108, 12);
+  PDrive(108, 12);
+  
+
+  //push balls in side
+
+  PTurn(132, 30);
+  PDrive(132, 30);
+  PTurn(132, 48);
+  PowerDrive(1, 12);
+  PTurn(135, 30);
+  PDrive(135, 30);
+  PowerDrive(1, 12);
+  PTurn(135, 30);
+  PDrive(135, 30);
+  
+  //corral balls to middle and push in
+
+  PTurn(108, 36);
+  PDrive(108, 36);
+  OpenRWing();
+  PTurn(96, 54);
+  PDrive(96, 54);
+  PTurn(120, 54);
+  PowerDrive(1, 12);
+  CloseRWing();
+  /*CloseLWing();*/
+  PDrive(84, 60);
+  PTurn(120, 60);
+  PowerDrive(2, 12);
+  PDrive(84, 60);
+  PTurn(120, 60);
+  PowerDrive(2, 12);
+
+
+
+
+
+
+
 
 }
 
